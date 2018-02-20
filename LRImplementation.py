@@ -2,6 +2,7 @@ import numpy
 import pandas
 from sklearn import preprocessing
 import matplotlib
+#This is used so that Python is not installed as a framework
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 
@@ -15,9 +16,15 @@ def classifyTestDataAndAccuracy(X, Y, bOpt, threshold):
     classify = numpy.array(Y_Pred > threshold)
     return float(sum(classify == Y)) / float(len(Y))
 
+#Normalize the data to help solve for gradient linear regression problem
+def min_max_normalization(data):
+    return data / 255
+
+#Gradient Linear Regression Formula
 def GD_LR(X, y, b):
     return -numpy.dot(X.transpose(), y) + numpy.dot(numpy.dot(X.transpose(), X), b)
 
+# cost function using OLS
 def cost(X, y, b):
     return numpy.sum((numpy.dot(X, b) - numpy.array(y))**2)
 #------------------------------->TASK 1<-----------------------------------------
@@ -46,15 +53,16 @@ print'{percent:.2%}'.format(percent=testBOptAccuracy)
 #------------------------------->TASK 2<-----------------------------------------
 
 #Normalize data based on Mingon Kang Linear Regression Python code
-X_nor = pandas.DataFrame(preprocessing.scale(xTraining))
-y_nor = preprocessing.scale(yTrainingLabel)
+X_nor = min_max_normalization(xTraining)
+y_nor = min_max_normalization(yTrainingLabel)
 
 #initial coefficients
-bEst = numpy.zeros(len(xTraining[0]))
+r,c = X_nor.shape
+bEst = numpy.zeros(c)
 bs = [bEst]
 costs = [cost(X_nor, y_nor, bEst)]
 #learning rate
-learning_rate = 1e-8
+learning_rate = 1e-4
 for i in range(0, 100):
     #Gradient Descent Algorithm
     bEst = bEst - learning_rate * GD_LR(X_nor, y_nor, bEst)
@@ -74,5 +82,6 @@ testTotalAccuracy = sum(abs(bOpt - bEst))
 print('\nAccuracy difference between these algorithms: ')
 print'{percent:.2%}'.format(percent=testTotalAccuracy)
 
+#Show a plot graph of cost function using OLS
 plt.plot(costs)
 plt.show()
